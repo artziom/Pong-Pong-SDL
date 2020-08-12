@@ -9,7 +9,7 @@ bool loadMedia();
 void close();
 
 SDL_Window *window = NULL;
-SDL_Surface *screenSurface = NULL;
+SDL_Renderer *renderer = NULL;
 
 bool init() {
   bool success = true;
@@ -25,7 +25,14 @@ bool init() {
       std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << "\r\n";
       success = false;
     } else {
-      screenSurface = SDL_GetWindowSurface(window);
+
+      renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+      if (renderer == NULL) {
+        std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << "\r\n";
+        success = false;
+      } else {
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+      }
     }
   }
 
@@ -38,8 +45,10 @@ bool loadMedia() {
 }
 
 void close() {
+  SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   window = NULL;
+  renderer = NULL;
 
   SDL_Quit();
 }
@@ -66,9 +75,8 @@ int main(int argc, char *args[]) {
           }
         }
 
-        SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-
-        SDL_UpdateWindowSurface(window);
+        SDL_RenderClear(renderer);
+        SDL_RenderPresent(renderer);
       }
     }
   }
