@@ -11,6 +11,19 @@ void close();
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
+struct Box {
+  float x, y, w, h, velX, velY, velocity;
+
+  void move() {
+    x += velX;
+    y += velY;
+
+    // std::cout << x << ", " << y << ", " << velX << ", " << velY << "\r\n";
+  }
+};
+
+Box player = {(SCREEN_WIDTH / 2) - 25, (SCREEN_HEIGHT / 2) - 25, 50, 50, 0, 0, 0.1};
+
 bool init() {
   bool success = true;
 
@@ -59,12 +72,15 @@ void clearScreen() {
 }
 
 void draw() {
-  SDL_Rect rect = {(SCREEN_WIDTH / 2) - 25, (SCREEN_HEIGHT / 2) - 25, 50, 50};
+  SDL_FRect rect = {player.x, player.y, player.w, player.h};
   SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-  SDL_RenderFillRect(renderer, &rect);
+  SDL_RenderFillRectF(renderer, &rect);
 }
 
-void update() { SDL_RenderPresent(renderer); }
+void update() {
+  player.move();
+  SDL_RenderPresent(renderer);
+}
 
 int main(int argc, char *args[]) {
   std::cout << "Hello World!\r\n";
@@ -85,6 +101,38 @@ int main(int argc, char *args[]) {
           if (e.type == SDL_QUIT) {
             std::cout << "Quit\r\n";
             quit = true;
+          }
+
+          if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
+            switch (e.key.keysym.sym) {
+            case SDLK_UP:
+              player.velY -= player.velocity;
+              break;
+            case SDLK_DOWN:
+              player.velY += player.velocity;
+              break;
+            case SDLK_LEFT:
+              player.velX -= player.velocity;
+              break;
+            case SDLK_RIGHT:
+              player.velX += player.velocity;
+              break;
+            }
+          } else if (e.type == SDL_KEYUP && e.key.repeat == 0) {
+            switch (e.key.keysym.sym) {
+            case SDLK_UP:
+              player.velY += player.velocity;
+              break;
+            case SDLK_DOWN:
+              player.velY -= player.velocity;
+              break;
+            case SDLK_LEFT:
+              player.velX += player.velocity;
+              break;
+            case SDLK_RIGHT:
+              player.velX -= player.velocity;
+              break;
+            }
           }
         }
 
